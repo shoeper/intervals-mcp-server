@@ -2,12 +2,14 @@
 
 Model Context Protocol (MCP) server for connecting Claude and ChatGPT with the Intervals.icu API. It provides tools for authentication and data retrieval for activities, events, and wellness data.
 
+Built with [FastMCP 2.0](https://gofastmcp.com) - the production-ready Python framework for MCP servers.
+
 If you find the Model Context Protocol (MCP) server useful, please consider supporting its continued development with a donation.
 
 ## Requirements
 
 - Python 3.12 or higher
-- [Model Context Protocol (MCP) Python SDK](https://github.com/modelcontextprotocol/python-sdk)
+- [FastMCP 2.0](https://github.com/jlowin/fastmcp) - Production-ready MCP framework
 - httpx
 - python-dotenv
 
@@ -53,11 +55,17 @@ Make a copy of `.env.example` and name it `.env` by running the following comman
 cp .env.example .env
 ```
 
-Then edit the `.env` file and set your Intervals.icu athlete id and API key:
+Then edit the `.env` file and set your Intervals.icu athlete id and API keys:
 
 ```
 API_KEY=your_intervals_api_key_here
 ATHLETE_ID=your_athlete_id_here
+MCP_SERVER_API_KEY=your_secure_mcp_server_key_here
+```
+
+**Generate a secure MCP server key:**
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
 #### Getting your Intervals.icu API Key
@@ -70,6 +78,130 @@ ATHLETE_ID=your_athlete_id_here
 
 Your athlete ID is typically visible in the URL when you're logged into Intervals.icu. It looks like:
 - `https://intervals.icu/athlete/i12345/...` where `i12345` is your athlete ID
+
+### 6. MCP Server Authentication
+
+This server requires API key authentication. Clients must provide the `MCP_SERVER_API_KEY` in the `Authorization` header:
+
+```
+Authorization: Bearer your_secure_mcp_server_key_here
+```
+
+This protects your Intervals.icu data from unauthorized access.
+
+## Transport Configuration
+
+The server supports multiple transport protocols:
+
+### STDIO Transport (Default)
+
+STDIO is the default transport, used for Claude Desktop and CLI applications:
+
+```bash
+# Default - no configuration needed
+uv run python src/intervals_mcp_server/server.py
+```
+
+### HTTP Transport
+
+Enable HTTP transport for web clients, APIs, and network access:
+
+#### 1. Configure environment
+
+Add to your `.env` file:
+
+```bash
+MCP_TRANSPORT=http
+MCP_HOST=127.0.0.1  # Use 0.0.0.0 for network access
+MCP_PORT=8000
+```
+
+Or set via command line:
+
+```bash
+export MCP_TRANSPORT=http
+export MCP_HOST=127.0.0.1
+export MCP_PORT=8000
+```
+
+#### 2. Start the server
+
+```bash
+uv run python src/intervals_mcp_server/server.py
+```
+
+The server will be available at: `http://127.0.0.1:8000/mcp`
+
+#### 3. Test the endpoint
+
+List available tools:
+
+```bash
+curl -X POST http://127.0.0.1:8000/mcp \
+  -H "Authorization: Bearer your_mcp_server_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
+```
+
+Call a tool (example - get activities):
+
+```bash
+curl -X POST http://127.0.0.1:8000/mcp \
+  -H "Authorization: Bearer your_mcp_server_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "get_activities",
+      "arguments": {
+        "athlete_id": "i12345",
+        "limit": 5
+      }
+    },
+    "id": 2
+  }'
+```
+
+#### 4. Network access
+
+To allow connections from other machines or Docker containers:
+
+```bash
+export MCP_HOST=0.0.0.0  # Listen on all interfaces
+export MCP_PORT=8080     # Custom port (optional)
+```
+
+**Security Note:** When exposing to a network, ensure `MCP_SERVER_API_KEY` is a strong, randomly-generated value.
+
+### SSE Transport
+
+Server-Sent Events transport for real-time updates:
+
+```bash
+export MCP_TRANSPORT=sse
+export MCP_HOST=127.0.0.1
+export MCP_PORT=8000
+```
+
+### Docker with HTTP Transport
+
+Run the server in Docker with HTTP enabled:
+
+```bash
+docker build -t intervals-mcp-server .
+
+docker run -p 8080:8000 \
+  -e API_KEY=your_intervals_api_key \
+  -e ATHLETE_ID=your_athlete_id \
+  -e MCP_SERVER_API_KEY=your_mcp_server_key \
+  -e MCP_TRANSPORT=http \
+  -e MCP_HOST=0.0.0.0 \
+  -e MCP_PORT=8000 \
+  intervals-mcp-server
+```
+
+Access at: `http://localhost:8080/mcp`
 
 ## Updating
 

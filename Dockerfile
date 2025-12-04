@@ -22,5 +22,8 @@ COPY .env.example .env.example
 # Install the package and runtime dependencies
 RUN pip install --no-cache-dir .
 
+# Expose default HTTP port (only used when MCP_TRANSPORT=http or sse)
+EXPOSE 8000
+
 # Default command to run the MCP server using stdio transport
-CMD ["mcp", "run", "src/intervals_mcp_server/server.py"]
+CMD ["python", "src/intervals_mcp_server/server.py"]

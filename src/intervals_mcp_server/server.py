@@ -34,8 +34,11 @@ Usage:
 """
 
 import logging
+import os
 
-from mcp.server.fastmcp import FastMCP  # pylint: disable=import-error
+from fastmcp import FastMCP
+from fastmcp.server.auth.auth import TokenVerifier
+from mcp.server.auth.provider import AccessToken
 
 # Import API client and configuration
 from intervals_mcp_server.api.client import (
@@ -60,8 +63,59 @@ logger = logging.getLogger("intervals_icu_mcp_server")
 # Get configuration instance
 config = get_config()
 
-# Initialize FastMCP server with custom lifespan
-mcp = FastMCP("intervals-icu", lifespan=setup_api_client)
+
+# Simple bearer token verifier for MCP server authentication
+class SimpleBearerTokenVerifier(TokenVerifier):
+    """Simple bearer token verifier for API key authentication.
+
+    This class inherits from FastMCP's TokenVerifier which provides all required
+    methods for authentication including get_middleware(), get_routes(), etc.
+    """
+
+    def __init__(self, valid_token: str):
+        """Initialize with a valid bearer token.
+
+        Args:
+            valid_token: The API key to accept for authentication.
+        """
+        # Initialize the base TokenVerifier class
+        super().__init__(base_url=None, required_scopes=None)
+        self.valid_token = valid_token
+
+    async def verify_token(self, token: str) -> AccessToken | None:
+        """Verify the provided token matches the configured API key.
+
+        Args:
+            token: The bearer token to verify.
+
+        Returns:
+            AccessToken if valid, None otherwise.
+        """
+        if token == self.valid_token:
+            # Return a valid access token with no expiration
+            return AccessToken(
+                token=token,
+                client_id="intervals-mcp-client",
+                scopes=[],
+                expires_at=None,  # No expiration
+                resource=None,
+            )
+        return None
+
+
+# Setup MCP server authentication (required)
+mcp_auth_key = os.getenv("MCP_SERVER_API_KEY")
+if not mcp_auth_key:
+    raise ValueError(
+        "MCP_SERVER_API_KEY environment variable is required. "
+        "Please set it in your .env file or environment."
+    )
+
+mcp_auth = SimpleBearerTokenVerifier(valid_token=mcp_auth_key)
+logger.info("MCP server authentication enabled (Authorization: Bearer)")
+
+# Initialize FastMCP server with custom lifespan and authentication
+mcp = FastMCP("intervals-icu", lifespan=setup_api_client, auth=mcp_auth)
 
 # Set the shared mcp instance for tool modules to use (breaks cyclic imports)
 from intervals_mcp_server import mcp_instance  # pylint: disable=wrong-import-position  # noqa: E402
