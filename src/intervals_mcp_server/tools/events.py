@@ -85,10 +85,12 @@ async def _delete_events_list(
 ) -> list[str]:
     """Delete a list of events and return IDs of failed deletions.
 
+    Always ask for confirmation before using this tool.
+
     Args:
         athlete_id: The athlete ID.
         api_key: Optional API key.
-        events: List of event dictionaries to delete.
+        events: List of event dictionaries to delete (required).
 
     Returns:
         List of event IDs that failed to delete.
@@ -171,7 +173,7 @@ async def get_event_by_id(
     """Get detailed information for a specific event from Intervals.icu
 
     Args:
-        event_id: The Intervals.icu event ID
+        event_id: The Intervals.icu event ID (required)
         athlete_id: The Intervals.icu athlete ID (optional, will use ATHLETE_ID from .env if not provided)
         api_key: The Intervals.icu API key (optional, will use API_KEY from .env if not provided)
     """
@@ -209,7 +211,7 @@ async def delete_event(
     Args:
         athlete_id: The Intervals.icu athlete ID (optional, will use ATHLETE_ID from .env if not provided)
         api_key: The Intervals.icu API key (optional, will use API_KEY from .env if not provided)
-        event_id: The Intervals.icu event ID
+        event_id: The Intervals.icu event ID (required)
     """
     athlete_id_to_use, error_msg = resolve_athlete_id(athlete_id, config.athlete_id)
     if error_msg:
@@ -230,10 +232,10 @@ async def _fetch_events_for_deletion(
     """Fetch events for deletion and return them with any error message.
 
     Args:
-        athlete_id: The athlete ID.
-        api_key: Optional API key.
-        start_date: Start date in YYYY-MM-DD format.
-        end_date: End date in YYYY-MM-DD format.
+        athlete_id: The athlete ID (optional)
+        api_key: Optional API key (optional)
+        start_date: Start date in YYYY-MM-DD format (required)
+        end_date: End date in YYYY-MM-DD format (required)
 
     Returns:
         Tuple of (events_list, error_message). error_message is None if successful.
@@ -255,13 +257,15 @@ async def delete_events_by_date_range(
     athlete_id: str | None = None,
     api_key: str | None = None,
 ) -> str:
-    """Delete events for an athlete from Intervals.icu in the specified date range.
+    """Delete events for an athlete from Intervals.icu in the specified date range. 
+    
+    Always ask for confirmation before using this.
 
     Args:
         athlete_id: The Intervals.icu athlete ID (optional, will use ATHLETE_ID from .env if not provided)
         api_key: The Intervals.icu API key (optional, will use API_KEY from .env if not provided)
-        start_date: Start date in YYYY-MM-DD format
-        end_date: End date in YYYY-MM-DD format
+        start_date: Start date in YYYY-MM-DD format (required)
+        end_date: End date in YYYY-MM-DD format (required)
     """
     athlete_id_to_use, error_msg = resolve_athlete_id(athlete_id, config.athlete_id)
     if error_msg:
@@ -290,19 +294,20 @@ async def add_or_update_event(  # pylint: disable=too-many-arguments,too-many-po
     moving_time: int | None = None,
     distance: int | None = None,
 ) -> str:
-    """Post event for an athlete to Intervals.icu this follows the event api from intervals.icu
-    If event_id is provided, the event will be updated instead of created.
+    """Post event for an athlete to Intervals.icu this follows the event api from intervals.icu. If event_id is provided, the event will be updated instead of created.
+
+    Always ask for confirmation before using this tool.
 
     Many arguments are required as this MCP tool function maps directly to the Intervals.icu API parameters.
 
-    Args:
+    Arguments:
         athlete_id: The Intervals.icu athlete ID (optional, will use ATHLETE_ID from .env if not provided)
         api_key: The Intervals.icu API key (optional, will use API_KEY from .env if not provided)
         event_id: The Intervals.icu event ID (optional, will use event_id from .env if not provided)
         start_date: Start date in YYYY-MM-DD format (optional, defaults to today)
-        name: Name of the activity
+        name: Name of the activity (required)
         workout_doc: steps as a list of Step objects (optional, but necessary to define workout steps)
-        workout_type: Workout type (e.g. Ride, Run, Swim, Walk, Row)
+        workout_type: Workout type (e.g. Ride, Run, Swim, Walk, Row) (required)
         moving_time: Total expected moving time of the workout in seconds (optional)
         distance: Total expected distance of the workout in meters (optional)
 
@@ -382,11 +387,13 @@ async def _create_or_update_event_request(
 ) -> str:
     """Create or update an event via API request.
 
+    Always ask for confirmation before using this tool.
+
     Args:
         athlete_id: The athlete ID.
         api_key: Optional API key.
-        event_data: Prepared event data dictionary.
-        start_date: Start date string for response formatting.
+        event_data: Prepared event data dictionary (required).
+        start_date: Start date string for response formatting (required).
         event_id: Optional event ID for updates.
 
     Returns:
