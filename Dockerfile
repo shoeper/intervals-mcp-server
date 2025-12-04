@@ -1,29 +1,13 @@
 FROM python:3.12-slim
 
-# Set working directory
+RUN apt-get update && apt-get install -y git curl sed net-tools && rm -rf /var/lib/apt/lists/* && pip --no-cache-dir install uv
+
 WORKDIR /app
 
-# Install build dependencies and Python build backend
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       build-essential \
-       curl \
-    && rm -rf /var/lib/apt/lists/*
+# Clone the repository
+RUN git clone https://github.com/shoeper/intervals-mcp-server.git .
+# 1. Install dependencies
+RUN uv sync
 
-# Install Python build tool
-RUN pip install --no-cache-dir hatchling
-
-# Copy project files
-COPY pyproject.toml pyproject.toml
-COPY src src
-COPY README.md README.md
-COPY .env.example .env.example
-
-# Install the package and runtime dependencies
-RUN pip install --no-cache-dir .
-
-# Expose default HTTP port (only used when MCP_TRANSPORT=http or sse)
-EXPOSE 8000
-
-# Default command to run the MCP server using stdio transport
-CMD ["python", "src/intervals_mcp_server/server.py"]
+# 3. Run using the 'mcp' CLI
+CMD ["uv" ,"run", "env", "FASTMCP_HOST=0.0.0.0", "FASTMCP_PORT=8000", "MCP_TRANSPORT=http", "FASTMCP_LOG_LEVEL=INFO", "python", "src/intervals_mcp_server/server.py"]

@@ -15,6 +15,24 @@ If you find the Model Context Protocol (MCP) server useful, please consider supp
 
 ## Setup
 
+### docker-compose
+
+```
+  intervals-mcp:
+    build: ./intervals-mcp
+    container_name: intervals-mcp
+    restart: always
+    #ports:
+    #  - "8000:8000"
+    environment:
+      # Pass the keys from your .env file
+      - API_KEY=${INTERVALS_API_KEY}
+      - ATHLETE_ID=${INTERVALS_ATHLETE_ID}
+      - MCP_SERVER_API_KEY=${MCP_SERVER_API_KEY}
+    networks:
+      - intervals-mcp
+```
+
 ### 1. Install uv (recommended)
 
 ```bash
