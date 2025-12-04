@@ -61,7 +61,6 @@ def start_server(mcp_instance: FastMCP, transport: TransportAliases) -> None:
         logger.info("Starting MCP server with stdio transport.")
         mcp_instance.run()
     elif transport == TransportAliases.SSE:
-        mount_path = os.getenv("MCP_SSE_MOUNT_PATH")
         logger.info(
             "Starting MCP server with SSE transport at http://%s:%s%s (messages: %s).",
             host,
@@ -69,7 +68,7 @@ def start_server(mcp_instance: FastMCP, transport: TransportAliases) -> None:
             fastmcp.settings.sse_path,
             fastmcp.settings.message_path,
         )
-        mcp_instance.run(transport="sse", mount_path=mount_path)
+        mcp_instance.run(transport="sse")
     else:  # STREAMABLE_HTTP
         logger.info(
             "Starting MCP server with Streamable HTTP transport at http://%s:%s%s.",
