@@ -28,7 +28,6 @@ Usage:
         - get_wellness_data
         - get_activity_intervals
         - get_activity_streams
-        - add_events
 
     See the README for more details on configuration and usage.
 """
@@ -132,8 +131,8 @@ from intervals_mcp_server.tools.activities import (  # pylint: disable=wrong-imp
 )
 from intervals_mcp_server.tools.events import (  # pylint: disable=wrong-import-position  # noqa: E402
     add_or_update_event,
-    delete_event,
-    delete_events_by_date_range,
+    #delete_event,
+    #delete_events_by_date_range,
     get_event_by_id,
     get_events,
 )
@@ -142,17 +141,17 @@ from intervals_mcp_server.tools.wellness import get_wellness_data  # pylint: dis
 # Re-export make_intervals_request and httpx_client for backward compatibility
 # pylint: disable=duplicate-code  # This __all__ list is intentionally similar to tools/__init__.py
 __all__ = [
-    "make_intervals_request",
-    "httpx_client",  # Re-exported for test compatibility
+    #"make_intervals_request",
+    #"httpx_client",  # Re-exported for test compatibility
     "get_activities",
     "get_activity_details",
     "get_activity_intervals",
     "get_activity_streams",
     "get_events",
     "get_event_by_id",
-    "delete_event",
-    "delete_events_by_date_range",
-    "add_or_update_event",
+    #"delete_event",
+    #"delete_events_by_date_range",
+    #"add_or_update_event",
     "get_wellness_data",
 ]
 

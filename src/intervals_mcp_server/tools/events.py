@@ -225,8 +225,8 @@ async def get_event_by_id(
     return format_event_details(result)
 
 
-# Disabled for safety
-@mcp.tool(requires_confirmation=True, enabled=False)
+# Disabled for safety by commenting out the tool decorator
+# @mcp.tool(requires_confirmation=True, enabled=False)
 async def delete_event(
     event_id: Annotated[str, Field(description="The Intervals.icu event ID to delete.")],
     athlete_id: Annotated[
@@ -286,8 +286,8 @@ async def _fetch_events_for_deletion(
     return events, None
 
 
-# Disabled for safety
-@mcp.tool(requires_confirmation=True, enabled=False)
+# Disabled for safety by commenting out the tool decorator
+# @mcp.tool(requires_confirmation=True, enabled=False)
 async def delete_events_by_date_range(
     start_date: Annotated[
         str, Field(description="The start date for the date range in YYYY-MM-DD format.")
@@ -331,8 +331,8 @@ async def delete_events_by_date_range(
     return f"Deleted {deleted_count} events. Failed to delete {len(failed_events)} events: {failed_events}"
 
 
-# Disabled for safety
-@mcp.tool(requires_confirmation=True, enabled=False)
+# Disabled for safety by commenting out the tool decorator
+# @mcp.tool(requires_confirmation=True, enabled=False)
 async def add_or_update_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     name: Annotated[str, Field(description="Name of the activity.")],
     workout_type: Annotated[
