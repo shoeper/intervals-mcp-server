@@ -46,26 +46,13 @@ git clone https://github.com/mvilanova/intervals-mcp-server.git
 cd intervals-mcp-server
 ```
 
-### 3. Create and activate a virtual environment
-
-```bash
-# Create virtual environment with Python 3.12
-uv venv --python 3.12
-
-# Activate virtual environment
-# On macOS/Linux:
-source .venv/bin/activate
-# On Windows:
-.venv\Scripts\activate
-```
-
-### 4. Sync project dependencies
+### 3. Sync project dependencies
 
 ```bash
 uv sync
 ```
 
-### 5. Set up environment variables
+### 4. Set up environment variables
 
 Make a copy of `.env.example` and name it `.env` by running the following command:
 
