@@ -7,6 +7,8 @@ This module contains tools for retrieving, creating, updating, and deleting athl
 import json
 from datetime import datetime
 from typing import Any
+from typing import Annotated
+from pydantic import Field
 
 from intervals_mcp_server.api.client import make_intervals_request
 from intervals_mcp_server.config import get_config
@@ -109,10 +111,22 @@ async def _delete_events_list(
 
 @mcp.tool()
 async def get_events(
-    athlete_id: str | None = None,
-    api_key: str | None = None,
-    start_date: str | None = None,
-    end_date: str | None = None,
+    athlete_id: Annotated[
+        str | None,
+        Field(description="The Intervals.icu athlete ID. Optional, defaults to ATHLETE_ID from .env."),
+    ] = None,
+    api_key: Annotated[
+        str | None,
+        Field(description="The Intervals.icu API key. Optional, defaults to API_KEY from .env."),
+    ] = None,
+    start_date: Annotated[
+        str | None,
+        Field(description="Start date in YYYY-MM-DD format. Optional, defaults to today."),
+    ] = None,
+    end_date: Annotated[
+        str | None,
+        Field(description="End date in YYYY-MM-DD format. Optional, defaults to 30 days from today."),
+    ] = None,
 ) -> str:
     """Get events for an athlete from Intervals.icu
 
@@ -166,9 +180,19 @@ async def get_events(
 
 @mcp.tool()
 async def get_event_by_id(
-    event_id: str,
-    athlete_id: str | None = None,
-    api_key: str | None = None,
+    event_id: Annotated[str, Field(description="The Intervals.icu event ID.")],
+    athlete_id: Annotated[
+        str | None,
+        Field(
+            description="The Intervals.icu athlete ID. Optional, defaults to ATHLETE_ID from .env."
+        ),
+    ] = None,
+    api_key: Annotated[
+        str | None,
+        Field(
+            description="The Intervals.icu API key. Optional, defaults to API_KEY from .env."
+        ),
+    ] = None,
 ) -> str:
     """Get detailed information for a specific event from Intervals.icu
 
@@ -201,13 +225,24 @@ async def get_event_by_id(
     return format_event_details(result)
 
 
-@mcp.tool()
+@mcp.tool(requires_confirmation=True)
 async def delete_event(
-    event_id: str,
-    athlete_id: str | None = None,
-    api_key: str | None = None,
+    event_id: Annotated[str, Field(description="The Intervals.icu event ID to delete.")],
+    athlete_id: Annotated[
+        str | None,
+        Field(
+            description="The Intervals.icu athlete ID. Optional, defaults to ATHLETE_ID from .env."
+        ),
+    ] = None,
+    api_key: Annotated[
+        str | None,
+        Field(
+            description="The Intervals.icu API key. Optional, defaults to API_KEY from .env."
+        ),
+    ] = None,
 ) -> str:
     """Delete event for an athlete from Intervals.icu
+
     Args:
         athlete_id: The Intervals.icu athlete ID (optional, will use ATHLETE_ID from .env if not provided)
         api_key: The Intervals.icu API key (optional, will use API_KEY from .env if not provided)
@@ -250,12 +285,24 @@ async def _fetch_events_for_deletion(
     return events, None
 
 
-@mcp.tool()
+@mcp.tool(requires_confirmation=True)
 async def delete_events_by_date_range(
-    start_date: str,
-    end_date: str,
-    athlete_id: str | None = None,
-    api_key: str | None = None,
+    start_date: Annotated[
+        str, Field(description="The start date for the date range in YYYY-MM-DD format.")
+    ],
+    end_date: Annotated[
+        str, Field(description="The end date for the date range in YYYY-MM-DD format.")
+    ],
+    athlete_id: Annotated[
+        str | None,
+        Field(
+            description="The Intervals.icu athlete ID. Optional, defaults to ATHLETE_ID from .env."
+        ),
+    ] = None,
+    api_key: Annotated[
+        str | None,
+        Field(description="The Intervals.icu API key. Optional, defaults to API_KEY from .env."),
+    ] = None,
 ) -> str:
     """Delete events for an athlete from Intervals.icu in the specified date range. 
     
@@ -282,17 +329,44 @@ async def delete_events_by_date_range(
     return f"Deleted {deleted_count} events. Failed to delete {len(failed_events)} events: {failed_events}"
 
 
-@mcp.tool()
+@mcp.tool(requires_confirmation=True)
 async def add_or_update_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-    workout_type: str,
-    name: str,
-    athlete_id: str | None = None,
-    api_key: str | None = None,
-    event_id: str | None = None,
-    start_date: str | None = None,
-    workout_doc: WorkoutDoc | None = None,
-    moving_time: int | None = None,
-    distance: int | None = None,
+    name: Annotated[str, Field(description="Name of the activity.")],
+    workout_type: Annotated[
+        str, Field(description="Workout type (e.g. Ride, Run, Swim, Walk, Row).")
+    ],
+    athlete_id: Annotated[
+        str | None,
+        Field(
+            description="The Intervals.icu athlete ID. Optional, defaults to ATHLETE_ID from .env."
+        ),
+    ] = None,
+    api_key: Annotated[
+        str | None,
+        Field(description="The Intervals.icu API key. Optional, defaults to API_KEY from .env."),
+    ] = None,
+    event_id: Annotated[
+        str | None,
+        Field(
+            description="The Intervals.icu event ID. If provided, the event will be updated. Otherwise, a new event is created."
+        ),
+    ] = None,
+    start_date: Annotated[
+        str | None,
+        Field(description="Start date in YYYY-MM-DD format. Optional, defaults to today."),
+    ] = None,
+    workout_doc: Annotated[
+        WorkoutDoc | None,
+        Field(description="Workout structure definition with steps."),
+    ] = None,
+    moving_time: Annotated[
+        int | None,
+        Field(description="Total expected moving time of the workout in seconds."),
+    ] = None,
+    distance: Annotated[
+        int | None,
+        Field(description="Total expected distance of the workout in meters."),
+    ] = None,
 ) -> str:
     """Post event for an athlete to Intervals.icu this follows the event api from intervals.icu. If event_id is provided, the event will be updated instead of created.
 
@@ -303,13 +377,13 @@ async def add_or_update_event(  # pylint: disable=too-many-arguments,too-many-po
     Arguments:
         athlete_id: The Intervals.icu athlete ID (optional, will use ATHLETE_ID from .env if not provided)
         api_key: The Intervals.icu API key (optional, will use API_KEY from .env if not provided)
-        event_id: The Intervals.icu event ID (optional, will use event_id from .env if not provided)
+        event_id: The Intervals.icu event ID. If provided, the event will be updated. Otherwise, a new event is created.
         start_date: Start date in YYYY-MM-DD format (optional, defaults to today)
         name: Name of the activity (required)
-        workout_doc: steps as a list of Step objects (optional, but necessary to define workout steps)
         workout_type: Workout type (e.g. Ride, Run, Swim, Walk, Row) (required)
-        moving_time: Total expected moving time of the workout in seconds (optional)
-        distance: Total expected distance of the workout in meters (optional)
+        workout_doc: Workout structure definition with steps.
+        moving_time: Total expected moving time of the workout in seconds.
+        distance: Total expected distance of the workout in meters.
 
     Example:
         "workout_doc": {
