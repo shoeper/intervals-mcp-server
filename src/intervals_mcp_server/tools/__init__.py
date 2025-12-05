@@ -15,9 +15,9 @@ from intervals_mcp_server.tools.activities import (  # noqa: F401
     get_activity_streams,
 )
 from intervals_mcp_server.tools.events import (  # noqa: F401
-    add_or_update_event,
-    delete_event,
-    delete_events_by_date_range,
+    #add_or_update_event,
+    #delete_event,
+    #delete_events_by_date_range,
     get_event_by_id,
     get_events,
 )
@@ -48,8 +48,8 @@ __all__ = [
     "get_activity_streams",
     "get_events",
     "get_event_by_id",
-    "delete_event",
-    "delete_events_by_date_range",
-    "add_or_update_event",
+    #"delete_event",
+    #"delete_events_by_date_range",
+    #"add_or_update_event",
     "get_wellness_data",
 ]
