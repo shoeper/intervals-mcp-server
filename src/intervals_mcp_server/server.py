@@ -130,7 +130,7 @@ from intervals_mcp_server.tools.activities import (  # pylint: disable=wrong-imp
     get_activity_streams,
 )
 from intervals_mcp_server.tools.events import (  # pylint: disable=wrong-import-position  # noqa: E402
-    add_or_update_event,
+    #add_or_update_event,
     #delete_event,
     #delete_events_by_date_range,
     get_event_by_id,
